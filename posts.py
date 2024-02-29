@@ -61,7 +61,7 @@ class SalePost(Post):
         if self._owner.password == password and not self.is_sold:
             update = self.price_in_NIS * (percent / 100)
             self.price_in_NIS -= update
-            print(f"Discount on {self._owner.username}'s product! The new price is: {self.price_in_NIS}")
+            print(f"Discount on {self._owner.username} product! the new price is: {self.price_in_NIS}")
         else:
             print("Invalid discount percentage. Please provide a valid number.")
 
@@ -69,7 +69,7 @@ class SalePost(Post):
         if self.is_sold:
             print(f"{self._owner.username} posted a product for sale:\nSold! {self.product}, price: {self.price_in_NIS}, pickup from: {self.pick_up_location}")
         else:
-            print(f"{self._owner.username} posted a product for sale:\nFor Sale! {self.product}, price: {self.price_in_NIS}, pickup from: {self.pick_up_location}\n")
+            print(f"{self._owner.username} posted a product for sale:\nFor sale! {self.product}, price: {self.price_in_NIS}, pickup from: {self.pick_up_location}\n")
 
 
 class ImagePost(Post):
@@ -94,3 +94,24 @@ class ImagePost(Post):
         except FileNotFoundError:
             return "Failed to display image."
 
+class PostFactory:
+
+    TEXT = "text"
+    IMAGE = "image"
+    SALE = "sale"
+
+    @staticmethod
+    def create_post(post_type, **kwargs):
+        if post_type == PostFactory.TEXT:
+            content = kwargs.get('content', None)
+            return TextPost(content)
+        elif post_type == PostFactory.IMAGE:
+            image_path = kwargs.get('image_path', None)
+            return ImagePost(image_path)
+        elif post_type == PostFactory.SALE:
+            product = kwargs.get('product', None)
+            price = kwargs.get('price', None)
+            location = kwargs.get('location', None)
+            return SalePost(product, price, location)
+        else:
+            raise ValueError(f"Invalid post type: {post_type}")

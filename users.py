@@ -55,8 +55,10 @@ class users:
         if post_type == "Text":
             post = TextPost(self, *args)
         elif post_type == "Image":
+            print(f"{self.username} posted a picture")
+            print()
             if len(args) == 1:
-                post = ImagePost(self, args[0])
+                post = ImagePost(self, *args)  # Create ImagePost instance with the image location
             else:
                 print("Invalid number of arguments for ImagePost")
         elif post_type == "Sale":
