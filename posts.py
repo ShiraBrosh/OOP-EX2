@@ -12,25 +12,24 @@ class Post(ABC):
         self.is_sold = True
 
     def comment(self, user, text):
-        if user != self._owner:
-            self.comments.append(user)
-            print(f"notification to {self._owner.username}: {user.username} commented on your post: {text}")
-            self._owner.notify(f"{user.username} commented on your post")
+        if user != self._owner:  # check if the user is the owner of the post
+            self.comments.append(user)  # add the user to the end of the  comment list
+            print(
+                f"notification to {self._owner.username}: {user.username} commented on your post: {text}")  # if the user is not the owner of the post print the notification
+            self._owner.notify(
+                f"{user.username} commented on your post")  # add the notification to the owner of the post
         else:
-            self.comments.append(user)
+            self.comments.append(user)  # if the user is the owner of the post only add the user to the end of the comment list but dont print the notofication
 
     def like(self, user):
-        if user != self._owner:
-            if user not in self.likes:
-                self.likes.append(user)
-                print(f"notification to {self._owner.username}: {user.username} liked your post")
+        if user != self._owner:  # check if the user is the owner of the post
+            if user not in self.likes:  # check if the user is not in the list of likes
+                self.likes.append(user)  # add the user to the end of the list of likes
+                print(
+                    f"notification to {self._owner.username}: {user.username} liked your post")  # if the user is not the owner of the post print the notification
                 self._owner.notify(f"{user.username} liked your post")
         else:
-            self.comments.append(user)
-
-    @abstractmethod
-    def display(self):
-        pass
+            self.like.append(user)  # if the user is the owner of the post only add the user to the end of the list of likes but dont print the notificatoin
 
     def __str__(self):
         if self.type == "Image":
@@ -38,38 +37,9 @@ class Post(ABC):
         else:
             return f"{self.display() or ''}"
 
-class TextPost(Post):
-    def __init__(self, name, text):
-        super().__init__(name ,"text")
-        self.text = text
+    @abstractmethod
     def display(self):
-        print(f"{self._owner.username} published a post:\n\"{self.text}\"")
-class SalePost(Post):
-    def __init__(self, owner, product, price_in_NIS, location):
-        super().__init__(owner, "sale")
-        self.product = product
-        self.price_in_NIS = price_in_NIS
-        self.pick_up_location = location
-        self.is_sold = False
-
-    def sold(self, password):
-        if self._owner.password == password:
-            self.is_sold = True
-            print(f"{self._owner.username}'s product is sold")
-
-    def discount(self, percent, password):
-        if self._owner.password == password and not self.is_sold:
-            update = self.price_in_NIS * (percent / 100)
-            self.price_in_NIS -= update
-            print(f"Discount on {self._owner.username} product! the new price is: {self.price_in_NIS}")
-        else:
-            print("Invalid discount percentage. Please provide a valid number.")
-
-    def display(self):
-        if self.is_sold:
-            print(f"{self._owner.username} posted a product for sale:\nSold! {self.product}, price: {self.price_in_NIS}, pickup from: {self.pick_up_location}")
-        else:
-            print(f"{self._owner.username} posted a product for sale:\nFor sale! {self.product}, price: {self.price_in_NIS}, pickup from: {self.pick_up_location}\n")
+        pass
 
 
 class ImagePost(Post):
@@ -77,33 +47,70 @@ class ImagePost(Post):
         super().__init__(name, "Image")
         self.location_image = image_location
 
-    def display(self):
+    def display(self):  # display the image
         print("Shows picture")
         try:
-            # Displaying image using Matplotlib
-            img_matplotlib = plt.imread(self.location_image)
-            plt.imshow(img_matplotlib)
-            plt.axis('off')  # Turn off axis labels
+            img_matplotlib = plt.imread(self.location_image)  # read the image
+            plt.imshow(img_matplotlib)  # display the image
+            plt.axis('off')  # remove the axis
             plt.show()
 
-            # Displaying image using Pillow
-            img_pillow = Image.open(self.location_image)
-            img_pillow.show()
+            img_pillow = Image.open(self.location_image)  # open the image
+            img_pillow.show()  # display the image
 
             return "Displayed an image."
-        except FileNotFoundError:
+        except FileNotFoundError:  # if the file is not found print the following message
             return "Failed to display image."
 
-class PostFactory:
 
+class TextPost(Post):
+    def __init__(self, name, text):
+        super().__init__(name, "text")
+        self.text = text
+
+    def display(self):
+        print(f"{self._owner.username} published a post:\n\"{self.text}\"")
+
+
+class SalePost(Post):
+    def __init__(self, owner, product, price_in_NIS, location):
+        super().__init__(owner, "sale")
+        self.product = product
+        self.price_in_NIS = price_in_NIS
+        self.pick_up_location = location
+        self.is_bought = False
+
+    def sold(self, password):
+        if self._owner.password == password:  # check if the password is correct
+            self.is_bought = True  # change the status of the product to sold
+            print(f"{self._owner.username}'s product is sold")
+
+    def discount(self, percent, password):
+        if self._owner.password == password and not self.is_bought:  # check if the password is correct and the product is not sold
+            after_update = self.price_in_NIS * (percent / 100)  # calculate the new price after the discount
+            self.price_in_NIS -= after_update
+            print(f"Discount on {self._owner.username} product! the new price is: {self.price_in_NIS}")
+        else:
+            print("Invalid discount percentage. Please provide a valid number.")
+
+    def display(self):
+        if self.is_bought:
+            print(
+                f"{self._owner.username} posted a product for sale:\nSold! {self.product}, price: {self.price_in_NIS}, pickup from: {self.pick_up_location}")  # print the product is sold
+        else:
+            print(
+                f"{self._owner.username} posted a product for sale:\nFor sale! {self.product}, price: {self.price_in_NIS}, pickup from: {self.pick_up_location}\n")
+
+
+class PostFactory:  # factory design pattern
     TEXT = "text"
     IMAGE = "image"
     SALE = "sale"
 
     @staticmethod
     def create_post(post_type, **kwargs):
-        if post_type == PostFactory.TEXT:
-            content = kwargs.get('content', None)
+        if post_type == PostFactory.TEXT:  # check the type of the post
+            content = kwargs.get('content', None)  # check the content of the post
             return TextPost(content)
         elif post_type == PostFactory.IMAGE:
             image_path = kwargs.get('image_path', None)
