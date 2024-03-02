@@ -45,10 +45,10 @@ class users:
             self.following.remove(user)
             user.followers.remove(self)
             user.num_Followers -= 1
-            # Print a message indicating that the user has unfollowed another user
             print(f"{self.username} unfollowed {user.username}")
-
-        raise Exception("already unfollowed")
+            return  # Exit the method after successful unfollow
+        else:
+            raise Exception("already unfollowed")
 
     def follow(self, user):
         if user not in self.following:
@@ -65,26 +65,26 @@ class users:
             raise Exception("User is not connected. Cannot publish post.")
 
         if post_type == "Sale":
-            post1 = SalePost(self, *args)                 #create a new sale post
+            post1 = SalePost(self, *args)  # create a new sale post
 
         elif post_type == "Image":
             print(f"{self.username} posted a picture")
             print()
 
-            if len(args) == 1:                          #check if the number of arguments is valid
+            if len(args) == 1:  # check if the number of arguments is valid
                 post1 = ImagePost(self, *args)
 
             else:
                 print("Invalid number of arguments for ImagePost")
 
         elif post_type == "Text":
-            post = TextPost(self, *args)
+            post1 = TextPost(self, *args)
 
         if post1:
-            post1._owner = self                        #set the owner of the post to the user
+            post1._owner = self  # set the owner of the post to the user
             self.posts.append(post1)
 
-            for follower in self.followers:                            #notify the followers of the user
+            for follower in self.followers:  # notify the followers of the user
                 follower.notify(f"{self.username} has a new post")
 
             if post_type != "Image":

@@ -29,7 +29,7 @@ class Post(ABC):
                     f"notification to {self._owner.username}: {user.username} liked your post")  # if the user is not the owner of the post print the notification
                 self._owner.notify(f"{user.username} liked your post")
         else:
-            self.like.append(user)  # if the user is the owner of the post only add the user to the end of the list of likes but dont print the notificatoin
+            self.likes.append(user)  # if the user is the owner of the post only add the user to the end of the list of likes but dont print the notificatoin
 
     def __str__(self):
         if self.type == "Image":
